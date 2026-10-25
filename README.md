@@ -1,6 +1,9 @@
-# DeepSeek Harness Desktop
+# Deepseek-Harness
 
-[![CI](https://github.com/AleCyriaco/deepseek-harness-desktop/actions/workflows/ci.yml/badge.svg)](https://github.com/AleCyriaco/deepseek-harness-desktop/actions/workflows/ci.yml)
+> Fork mantido por **CeoMatheusDev**, baseado no [DeepSeek Harness Desktop original](https://github.com/AleCyriaco/deepseek-harness-desktop). O projeto permanece sob a licença MIT e preserva os créditos do autor original.
+
+
+[![CI](https://github.com/CeoMatheusDev/Deepseek-Harness/actions/workflows/ci.yml/badge.svg)](https://github.com/CeoMatheusDev/Deepseek-Harness/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Tauri v2](https://img.shields.io/badge/Tauri-v2-24C8DB.svg)](https://tauri.app)
 [![Rust](https://img.shields.io/badge/Rust-stable-orange.svg)](https://www.rust-lang.org)
@@ -14,6 +17,39 @@ It launches the real `dsh web` server as a child process and hosts the exact sam
 | macOS | WKWebView | `.app`, `.dmg` |
 | Windows | WebView2 (Edge) | `.msi`, `.exe` (NSIS) |
 | Linux | WebKitGTK | `.deb`, `.rpm` |
+
+## Status do fork e próximos passos
+
+Este fork parte da versão desktop **v0.1.7**. O backend atualmente declarado em `backend/package.json` é `@deepseek-ai/dsh` na faixa `^0.1.1-rc.2`; o runtime efetivamente instalado é determinado por `backend/package-lock.json`.
+
+**Em planejamento — ainda não implementado neste fork:** avaliar a atualização controlada do backend para a linha `v0.2.1-rc.3`, com foco no suporte nativo a assinaturas conectadas, incluindo **ChatGPT / Codex** e outros provedores que a versão do backend realmente oferecer. A integração deverá preservar o fluxo oficial de autenticação, a gestão de credenciais pelo próprio backend e a seleção de modelos na interface do Harness. O aplicativo desktop não deve copiar tokens de outros aplicativos nem prometer acesso a modelos sem suporte oficial.
+
+Antes de habilitar o recurso, serão necessários testes de compatibilidade do comando `dsh web`, atualização conjunta do lockfile, testes de login/logout e validação do pacote RPM no Fedora.
+
+### Compilar no Fedora
+
+Pré-requisitos: Node.js compatível com o backend instalado, Rust/Cargo e dependências do Tauri/WebKitGTK.
+
+```bash
+sudo dnf install -y gcc gcc-c++ make pkgconf-pkg-config openssl-devel \
+  gtk3-devel webkit2gtk4.1-devel libappindicator-gtk3-devel \
+  librsvg2-devel patchelf file
+
+npm ci
+npm run backend:install
+npm run backend:check
+
+cd src-tauri
+cargo fmt --all -- --check
+cargo clippy --all-targets -- -D warnings
+cargo test --all-targets
+cd ..
+
+npm run build -- --bundles rpm
+find src-tauri/target/release/bundle/rpm -type f -name '*.rpm'
+```
+
+O pacote gerado fica em `src-tauri/target/release/bundle/rpm/`. A compilação e os testes acima devem ser executados novamente após cada atualização do backend. **O login ChatGPT/Codex não está habilitado por esta atualização de documentação.**
 
 ## Download
 
@@ -45,6 +81,7 @@ xattr -dr com.apple.quarantine "/Applications/DeepSeek Harness Desktop.app"
 
 ## Table of contents
 
+- [Status do fork e próximos passos](#status-do-fork-e-próximos-passos)
 - [Download](#download)
 - [Why a shell instead of a port](#why-a-shell-instead-of-a-port)
 - [How it works](#how-it-works)
